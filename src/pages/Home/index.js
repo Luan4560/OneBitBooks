@@ -4,10 +4,21 @@ import {FiShoppingBag} from 'react-icons/fi';
 import {Container} from './styles';
 
 import {api} from '../../services/api'
+import * as CartActions from '../../store/modules/cart/action';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const Home = () => {
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const amount = useSelector(state => state.cart.reduce((sumAmount, book) => {
+    sumAmount[book.id] = book.amount
+
+    return sumAmount;
+  }, {})
+  )
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const loadBooks = async() => {
@@ -22,27 +33,32 @@ export const Home = () => {
     loadBooks()
   }, [])
 
+  const handleAddProduct = (book) => {
+    dispatch(CartActions.addToCart(book));
+  }
+
   return (
     <Container>
-     <ul>
-       {books.map(book => (
-        <li key={book.id}>
-          <img src={book.image} 
-          alt={book.title}/>
-          <strong>{book.title}</strong>
-          <span>R$ {book.price}</span>
+      {!isLoading && (
+      <ul>
+        {books.map(book => (
+          <li key={book.id}>
+            <img src={book.image} 
+            alt={book.title}/>
+            <strong>{book.title}</strong>
+            <span>R$ {book.price}</span>
 
-          <button type="button" onClick={() => {}}>
-            <div>
-              <FiShoppingBag size={16} color="#33bfcb" />
-              0
-
-            </div>
-              <span className="btn-text">Add</span>
-          </button>
-        </li>
-          ))}
-     </ul>
+            <button type="button" onClick={()=>handleAddProduct(book)}>
+              <div>
+                <FiShoppingBag size={16} color="#33bfcb" />
+                {amount[book.id] || 0}
+              </div>
+                <span className="btn-text">Add</span>
+            </button>
+          </li>
+            ))}
+      </ul>
+      )}
     </Container>
   )
 }

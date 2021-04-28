@@ -1,7 +1,39 @@
 import {Container} from './styles'
+import {useDispatch, useSelector} from 'react-redux'
 import {FiMinusCircle, FiPlusCircle, FiXCircle} from 'react-icons/fi'
 
+import * as CartActions from '../../store/modules/cart/action';
+
 export const Cart = () => {
+  const cart = useSelector(state => 
+    state.cart.map(book => ({
+      ...book,
+      subtotal: book.price * book.amount
+    }))  
+  )
+
+  const total = useSelector(state =>
+    state.cart.reduce((totalSum, product) => {
+      return totalSum + product.price * product.amount;
+    }, 0)
+  );
+  
+  const dispatch = useDispatch();
+  
+  const increment =(book) => {
+    dispatch(CartActions.updateAmount({
+      id: book.id,
+      amount: book.amount + 1,
+    }));
+  }
+  
+  const  decrement =(book) => {
+    dispatch(CartActions.updateAmount({
+      id: book.id,
+      amount: book.amount - 1,
+    }));
+  }
+
   return (
     <Container>
       <div className="bag-container">
@@ -16,36 +48,38 @@ export const Cart = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
+            {cart.map(book => (
+            <tr key={book.id}>
               <td>
-                <img src="https://images-na.ssl-images-amazon.com/images/I/51w53T12s8L.jpg" alt="JavaScript: O Guia Definitivo"/>
+                <img src={book.image} alt={book.title}/>
               </td>
               <td>
-                <strong>Javascript: The definitive guide</strong>
-                <span>R$ 146,08</span>
+                <strong>{book.title}</strong>
+                <span>R$ {book.price}</span>
               </td>
               <td>
                 <div>
-                  <button type="button" onClick={() => {}}>
+                  <button type="button" onClick={() => decrement(book)}>
                     <FiMinusCircle size={20} color="#33bfcb"/>
                   </button>
-                    <input type="number" readOnly value="1"/>
-                  <button type="button" onClick={() => {}}>
+                    <input type="number" readOnly value={book.amount}/>
+                  <button type="button" onClick={() => increment(book)}>
                     <FiPlusCircle size={20} color="#33bcfb" />
                   </button>
                 </div>
               </td>
               <td>
-                <strong>R$ 1000,00</strong>
+                <strong>R$ {book.subtotal.toFixed(3).slice(0, -1)}</strong>
               </td>
               <td>
                 <button
                   type="button"
-                  onClick={() => {}}>
+                  onClick={() => dispatch(CartActions.removeFromCart(book.id))}>
                     <FiXCircle size={20} color="#33bfcb" />
                   </button>
               </td>
             </tr>
+            ))}
           </tbody>
         </table>
 
@@ -54,7 +88,7 @@ export const Cart = () => {
 
           <div>
             <span>Total</span>
-            <strong>R$ 1000,00</strong>
+            <strong>R$ {total.toFixed(3).slice(0,-1)}</strong>
           </div>
         </footer>
       </div>

@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux';
 import {Container} from './styles'
 import {Link} from 'react-router-dom';
 
@@ -5,6 +6,7 @@ import {FiShoppingBag} from 'react-icons/fi'
 import {GiBlackBook as Logo } from 'react-icons/gi'
 
 export const Header = () => {
+  const cartSize = useSelector(state => state.cart.length);
   return (
     <Container>
      <Link to="/" className="logo">
@@ -16,7 +18,7 @@ export const Header = () => {
         <div>
           <strong> Bag </strong> 
            <span>
-            <strong> 4 </strong> Books 
+            <strong> {cartSize} </strong> Books 
           </span>
           <FiShoppingBag size={36} color="#fff"/>
         </div>
